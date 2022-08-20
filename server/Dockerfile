@@ -17,5 +17,5 @@ COPY . .
 
 Volume /root/nodejsdocker_alpine/
 
-EXPOSE 8080
+EXPOSE 2233
 CMD [ "node", "index.js" ]
