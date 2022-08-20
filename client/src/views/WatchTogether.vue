@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { io } from 'socket.io-client'
+import { getSocket } from '@/api/socketServer'
 import { uuid } from '@/utils/uuid'
 
 export default {
@@ -94,7 +94,7 @@ export default {
   mounted () {
     this.player = this.$refs.VueAliplayerV2
     console.log(this.player)
-    this.socket = io('ws://192.168.1.115:2233')
+    this.socket = getSocket()
     // 在连接错误时触发
     this.socket.io.on('error', (err) => {
       console.log('连接错误', err) // false
