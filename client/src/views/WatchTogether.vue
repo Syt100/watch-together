@@ -1,12 +1,20 @@
 <template>
   <div>
     <VueAliplayerV2
+      v-show="false"
       ref="VueAliplayerV2"
       :source="config.source"
       @ready="handleVideoReady"
       @play="handleVideoPlay"
       @pause="handleVideoPause"
       @completeSeek="handleVideoCompleteSeek"
+    />
+    <XGPlayer
+      ref="xgPlayer"
+      :url="config.source"
+      @play="handleVideoPlay"
+      @pause="handleVideoPause"
+      @seeked="handleVideoCompleteSeek"
     />
     <div>
       <el-tabs value="first">
@@ -36,15 +44,22 @@
 </template>
 
 <script>
+import XGPlayer from '@/components/XGPlayer'
 import { getSocket } from '@/api/socketServer'
 import { uuid } from '@/utils/uuid'
 
 export default {
   name: 'WatchTogether',
+  components: {
+    XGPlayer
+  },
   data () {
     return {
       socket: null,
       player: null,
+      xgPlayer: null,
+      currentPlayerName: 'xgPlayer',
+      currentPlayer: null,
       config: {
         roomId: 123,
         autoSyncPlayProgress: false,
@@ -93,6 +108,8 @@ export default {
   },
   mounted () {
     this.player = this.$refs.VueAliplayerV2
+    this.xgPlayer = this.$refs.xgPlayer
+    this.currentPlayer = this.xgPlayer
     console.log(this.player)
     this.socket = getSocket()
     // 在连接错误时触发
@@ -119,22 +136,26 @@ export default {
       switch (message.type) {
         case 'play':
           console.log('收到开始播放的消息：', message)
-          this.player.play()
+          this.playerPlay()
           break
         case 'pause':
           console.log('收到暂停播放的消息', message)
-          this.player.pause()
+          this.playerPause()
           break
-        case 'seek':
+        case 'seek': {
           console.log('收到调节播放进度的消息', message)
-          this.player.seek(message.seekTime)
+          const difference = Math.abs(this.playerGetCurrentTime() - message.seekTime)
+          if (difference > 2) {
+            this.playerSeek(message.seekTime)
+          }
           break
+        }
         case 'syncProcess': {
           console.log('收到同步播放进度的消息', message)
-          const difference = Math.abs(this.player.getCurrentTime() - message.seekTime)
+          const difference = Math.abs(this.playerGetCurrentTime() - message.seekTime)
           console.log('本机进度与远程进度的差距为', difference)
           if (difference > 6) {
-            this.player.seek(message.seekTime)
+            this.playerSeek(message.seekTime)
           }
           break
         }
@@ -158,9 +179,13 @@ export default {
       this.seedMessage()
     },
     handleVideoCompleteSeek (time) {
-      console.log('跳转播放，时间为', time)
       this.eventParameters.type = 'seek'
-      this.eventParameters.seekTime = time.paramData
+      if (this.currentPlayerName === 'xgPlayer') {
+        this.eventParameters.seekTime = this.currentPlayer.getPlayer().currentTime
+      } else {
+        this.eventParameters.seekTime = time.paramData
+      }
+      console.log('跳转播放，时间为', this.eventParameters.seekTime)
       this.seedMessage()
     },
     handleAutoSyncPlayProgress () {
@@ -179,6 +204,26 @@ export default {
     },
     seedMessage () {
       this.socket.emit('video-control', JSON.stringify(this.triggerEventParameters))
+    },
+    playerPlay () {
+      this.currentPlayer.play()
+    },
+    playerPause () {
+      this.currentPlayer.pause()
+    },
+    playerGetCurrentTime () {
+      if (this.currentPlayerName === 'xgPlayer') {
+        return this.currentPlayer.getPlayer().currentTime
+      } else {
+        return this.currentPlayer.getCurrentTime()
+      }
+    },
+    playerSeek (time) {
+      if (this.currentPlayerName === 'xgPlayer') {
+        this.currentPlayer.getPlayer().currentTime = time
+      } else {
+        this.currentPlayer.seek(time)
+      }
     }
   }
 }
