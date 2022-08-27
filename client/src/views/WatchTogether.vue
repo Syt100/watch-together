@@ -39,6 +39,12 @@
           <el-switch v-model="config.autoSyncPlayProgress" />
         </el-form-item>
       </el-form>
+      <el-divider></el-divider>
+      <el-card shadow="hover" style="max-height: 300px;overflow-y: auto">
+        <ul>
+          <li v-for="item in messageList" :key="item.id">{{ item.content }}</li>
+        </ul>
+      </el-card>
     </div>
   </div>
 </template>
@@ -47,6 +53,7 @@
 import XGPlayer from '@/components/XGPlayer'
 import { getSocket } from '@/api/socketServer'
 import { uuid } from '@/utils/uuid'
+import moment from 'moment'
 
 export default {
   name: 'WatchTogether',
@@ -71,7 +78,8 @@ export default {
         uuid: undefined,
         seekTime: null,
         updateUrl: null
-      }
+      },
+      messageList: []
     }
   },
   computed: {
@@ -137,16 +145,19 @@ export default {
         case 'play':
           console.log('收到开始播放的消息：', message)
           this.playerPlay()
+          this.pushMessage('对方开始播放')
           break
         case 'pause':
           console.log('收到暂停播放的消息', message)
           this.playerPause()
+          this.pushMessage('对方暂停播放')
           break
         case 'seek': {
           console.log('收到调节播放进度的消息', message)
           const difference = Math.abs(this.playerGetCurrentTime() - message.seekTime)
           if (difference > 2) {
             this.playerSeek(message.seekTime)
+            this.pushMessage('对方调节了播放进度')
           }
           break
         }
@@ -156,6 +167,7 @@ export default {
           console.log('本机进度与远程进度的差距为', difference)
           if (difference > 6) {
             this.playerSeek(message.seekTime)
+            this.pushMessage('播放进度已同步')
           }
           break
         }
@@ -224,6 +236,13 @@ export default {
       } else {
         this.currentPlayer.seek(time)
       }
+    },
+    pushMessage (message) {
+      const m = {
+        id: uuid(),
+        content: moment().format('hh:mm:ss') + ' ' + message
+      }
+      this.messageList.unshift(m)
     }
   }
 }
