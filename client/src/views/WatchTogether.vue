@@ -209,10 +209,10 @@ export default {
       this.seedMessage()
     },
     handleAutoSyncPlayProgress () {
-      console.log('自动同步进度。当前播放器状态', this.player.getStatus())
-      if (this.player.getStatus() === 'playing') {
+      console.log('自动同步进度。当前播放器状态', this.playerStatus())
+      if (this.playerStatus() === 'playing') {
         this.eventParameters.type = 'syncProcess'
-        this.eventParameters.seekTime = this.player.getCurrentTime()
+        this.eventParameters.seekTime = this.playerGetCurrentTime()
         this.seedMessage()
       }
     },
@@ -230,6 +230,13 @@ export default {
     },
     playerPause () {
       this.currentPlayer.pause()
+    },
+    playerStatus () {
+      if (this.currentPlayerName === 'xgPlayer') {
+        return this.currentPlayer.getPlayer().hasStart ? 'playing' : 'paused'
+      } else {
+        return this.currentPlayer.getStatus()
+      }
     },
     playerGetCurrentTime () {
       if (this.currentPlayerName === 'xgPlayer') {
