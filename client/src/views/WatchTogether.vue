@@ -105,6 +105,9 @@ export default {
         localStorage.setItem('config', JSON.stringify(this.config))
         if (this.config.autoSyncPlayProgress) {
           console.log('开启自动同步')
+          if (this.autoSyncPlayProgressTimer) {
+            clearInterval(this.autoSyncPlayProgressTimer)
+          }
           this.autoSyncPlayProgressTimer = setInterval(this.handleAutoSyncPlayProgress, 1000 * 3)
         } else {
           if (this.autoSyncPlayProgressTimer != null) {
@@ -233,7 +236,7 @@ export default {
     },
     playerStatus () {
       if (this.currentPlayerName === 'xgPlayer') {
-        return this.currentPlayer.getPlayer().hasStart ? 'playing' : 'paused'
+        return this.currentPlayer.getPlayer().paused ? 'paused' : 'playing'
       } else {
         return this.currentPlayer.getStatus()
       }
