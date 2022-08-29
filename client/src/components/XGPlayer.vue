@@ -99,6 +99,10 @@ export default {
           hideButton: false
         },
         keyShortcut: 'on',
+        keyShortcutStep: { // 设置调整步长
+          currentTime: 3, // 播放进度调整步长，默认10秒
+          volume: 0.1 // 音量调整步长，默认0.1
+        },
         /** 关闭点击视频切换播放/暂停状态 */
         closeVideoTouch: true,
         /** 使移动端支持双击暂停/播放 */
