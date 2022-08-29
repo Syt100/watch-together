@@ -98,7 +98,11 @@ export default {
         screenShot: {
           hideButton: false
         },
-        keyShortcut: 'on'
+        keyShortcut: 'on',
+        /** 关闭点击视频切换播放/暂停状态 */
+        closeVideoTouch: true,
+        /** 使移动端支持双击暂停/播放 */
+        enableVideoDbltouch: true
       }
       //= ========================= 2，开始实例化======================
       this.player && this.player.destroy() // 防止实例的重复
