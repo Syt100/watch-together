@@ -1,54 +1,61 @@
 <template>
-  <div>
-    <VueAliplayerV2
-      v-show="false"
-      ref="VueAliplayerV2"
-      :source="config.source"
-      @ready="handleVideoReady"
-      @play="handleVideoPlay"
-      @pause="handleVideoPause"
-      @completeSeek="handleVideoCompleteSeek"
-    />
-    <XGPlayer
-      ref="xgPlayer"
-      :url="config.source"
-      @play="handleVideoPlay"
-      @pause="handleVideoPause"
-      @seeked="handleVideoCompleteSeek"
-    />
-    <div>
-      <el-tabs value="first">
-        <el-tab-pane label="创建房间" name="first">
-          <el-button @click="createRoomId">点击创建房间</el-button>
-          <span>{{ config.roomId }}</span>
-        </el-tab-pane>
-        <el-tab-pane label="加入房间" name="second">
-          <el-input v-model.number="config.roomId" type="number" placeholder="输入房间号">
-            <el-button slot="append" icon="el-icon-check">确定</el-button>
-          </el-input>
-        </el-tab-pane>
-      </el-tabs>
-      <div>
-        <span>当前播放：</span>
-        <el-input v-model.lazy="config.source" placeholder="输入视频链接">
-          <el-button slot="append" icon="el-icon-check" @click="handleUpdateVideoUrl">更新</el-button>
-        </el-input>
-      </div>
-      <el-form :model="config">
-        <el-form-item label="自动同步进度">
-          <el-switch v-model="config.autoSyncPlayProgress" />
-          <span>{{ syncProgressTimeComputed }}</span>
-        </el-form-item>
-      </el-form>
-      <el-divider></el-divider>
-      <el-card shadow="hover" style="max-height: 300px;overflow-y: auto">
-        <ul>
-          <li v-for="item in messageList" :key="item.id">
-            <span :style="{color: item.color}">{{ item.content }}</span>
-          </li>
-        </ul>
-      </el-card>
-    </div>
+  <div class="video-together-container">
+    <el-row type="flex" style="display:flex; flex-wrap: wrap; justify-content: center;">
+      <el-col :xs="24" :sm="12" :md="12">
+        <VueAliplayerV2
+          v-show="false"
+          ref="VueAliplayerV2"
+          :source="config.source"
+          @ready="handleVideoReady"
+          @play="handleVideoPlay"
+          @pause="handleVideoPause"
+          @completeSeek="handleVideoCompleteSeek"
+        />
+        <XGPlayer
+          ref="xgPlayer"
+          :url="config.source"
+          @play="handleVideoPlay"
+          @pause="handleVideoPause"
+          @seeked="handleVideoCompleteSeek"
+        />
+      </el-col>
+      <el-col :xs="24" :sm="12" :md="12">
+        <div class="hidden-xs-only" style="width: 20px; min-height: 1px; float: left;" />
+        <div style="float: left;">
+          <el-tabs value="first">
+            <el-tab-pane label="创建房间" name="first">
+              <el-button @click="createRoomId">点击创建房间</el-button>
+              <span>{{ config.roomId }}</span>
+            </el-tab-pane>
+            <el-tab-pane label="加入房间" name="second">
+              <el-input v-model.number="config.roomId" type="number" placeholder="输入房间号">
+                <el-button slot="append" icon="el-icon-check">确定</el-button>
+              </el-input>
+            </el-tab-pane>
+          </el-tabs>
+          <div>
+            <span>当前播放：</span>
+            <el-input v-model.lazy="config.source" placeholder="输入视频链接">
+              <el-button slot="append" icon="el-icon-check" @click="handleUpdateVideoUrl">更新</el-button>
+            </el-input>
+          </div>
+          <el-form :model="config">
+            <el-form-item label="自动同步进度">
+              <el-switch v-model="config.autoSyncPlayProgress" />
+              <span>{{ syncProgressTimeComputed }}</span>
+            </el-form-item>
+          </el-form>
+          <el-divider></el-divider>
+          <el-card shadow="hover" style="max-height: 300px;overflow-y: auto">
+            <ul>
+              <li v-for="item in messageList" :key="item.id">
+                <span :style="{color: item.color}">{{ item.content }}</span>
+              </li>
+            </ul>
+          </el-card>
+        </div>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -276,6 +283,10 @@ export default {
 </script>
 
 <style scoped>
+.video-together-container {
+  margin: 10px;
+}
+
 span {
   margin-left: 10px;
 }
