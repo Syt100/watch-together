@@ -37,6 +37,7 @@
       <el-form :model="config">
         <el-form-item label="自动同步进度">
           <el-switch v-model="config.autoSyncPlayProgress" />
+          <span>{{ syncProgressTimeComputed }}</span>
         </el-form-item>
       </el-form>
       <el-divider></el-divider>
@@ -75,6 +76,7 @@ export default {
         source: '//player.alicdn.com/video/aliyunmedia.mp4'
       },
       autoSyncPlayProgressTimer: null,
+      syncProgressTime: 0, // 本机与对方的进度差值
       eventParameters: {
         type: 'play',
         uuid: undefined,
@@ -96,6 +98,11 @@ export default {
         roomId: this.config.roomId,
         ...this.eventParameters
       }
+    },
+    syncProgressTimeComputed () {
+      const s = this.syncProgressTime > 0 ? '快' : '慢'
+      // 此处使用反引号 ` 实现模板字符串
+      return `进度比对方${s}了` + Math.abs(this.syncProgressTime).toFixed(2) + '秒'
     }
   },
   watch: {
@@ -176,6 +183,7 @@ export default {
           console.log('收到同步播放进度的消息', message)
           const difference = Math.abs(this.playerGetCurrentTime() - message.seekTime)
           console.log('本机进度与远程进度的差距为', difference)
+          this.syncProgressTime = this.playerGetCurrentTime() - message.seekTime
           if (difference > 6) {
             this.playerSeek(message.seekTime)
             this.pushMessage('播放进度已同步', 'sync')
@@ -268,5 +276,7 @@ export default {
 </script>
 
 <style scoped>
-
+span {
+  margin-left: 10px;
+}
 </style>
