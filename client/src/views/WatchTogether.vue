@@ -1,7 +1,7 @@
 <template>
   <div class="video-together-container">
-    <el-row type="flex" style="display:flex; flex-wrap: wrap; justify-content: center;">
-      <el-col :xs="24" :sm="12" :md="12">
+    <div class="main">
+      <div class="group video">
         <VueAliplayerV2
           v-show="false"
           ref="VueAliplayerV2"
@@ -18,10 +18,9 @@
           @pause="handleVideoPause"
           @seeked="handleVideoCompleteSeek"
         />
-      </el-col>
-      <el-col :xs="24" :sm="12" :md="12">
-        <div class="hidden-xs-only" style="width: 20px; min-height: 1px; float: left;" />
-        <div style="float: left;">
+      </div>
+      <div class="group panel">
+        <div>
           <el-tabs value="first">
             <el-tab-pane label="创建房间" name="first">
               <el-button @click="createRoomId">点击创建房间</el-button>
@@ -54,8 +53,8 @@
             </ul>
           </el-card>
         </div>
-      </el-col>
-    </el-row>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -285,6 +284,28 @@ export default {
 <style scoped>
 .video-together-container {
   margin: 10px;
+}
+
+.main {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.group {
+  width: 100%;
+}
+
+@media only screen and  (min-width: 769px) {
+  .video {
+    max-width: 600px;
+  }
+  .panel {
+    width: 500px;
+    max-width: 600px;
+  }
 }
 
 span {

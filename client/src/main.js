@@ -9,7 +9,6 @@ import VueAliplayerV2 from 'vue-aliplayer-v2'
 
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-import 'element-ui/lib/theme-chalk/display.css'
 
 Vue.use(VueAliplayerV2)
 Vue.use(ElementUI)
