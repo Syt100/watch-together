@@ -104,7 +104,7 @@ export default {
           volume: 0.1 // 音量调整步长，默认0.1
         },
         /** 关闭点击视频切换播放/暂停状态 */
-        closeVideoTouch: true,
+        // closeVideoTouch: true,
         /** 使移动端支持双击暂停/播放 */
         enableVideoDbltouch: true
       }
