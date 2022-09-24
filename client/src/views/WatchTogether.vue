@@ -312,4 +312,8 @@ export default {
 span {
   margin-left: 10px;
 }
+
+:deep(.el-card__body) {
+  padding: 0;
+}
 </style>
