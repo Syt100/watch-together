@@ -22,18 +22,18 @@
       <div class="group panel">
         <div>
           <el-tabs value="first">
-            <el-tab-pane label="创建房间" name="first">
-              <el-button @click="createRoomId">点击创建房间</el-button>
-              <span>{{ config.roomId }}</span>
-            </el-tab-pane>
-            <el-tab-pane label="加入房间" name="second">
+            <el-tab-pane label="加入房间" name="first">
               <el-input v-model.number="config.roomId" type="number" placeholder="输入房间号">
                 <el-button slot="append" icon="el-icon-check">确定</el-button>
               </el-input>
             </el-tab-pane>
+            <el-tab-pane label="创建房间" name="second">
+              <el-button @click="createRoomId">点击创建房间</el-button>
+              <span>{{ config.roomId }}</span>
+            </el-tab-pane>
           </el-tabs>
           <div>
-            <span>当前播放：</span>
+            <div style="margin: 10px 0;">当前播放：</div>
             <el-input v-model.lazy="config.source" placeholder="输入视频链接">
               <el-button slot="append" icon="el-icon-check" @click="handleUpdateVideoUrl">更新</el-button>
             </el-input>
