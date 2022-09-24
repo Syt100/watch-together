@@ -78,7 +78,7 @@ export default {
       currentPlayer: null,
       config: {
         roomId: 123,
-        autoSyncPlayProgress: false,
+        autoSyncPlayProgress: true,
         source: '//player.alicdn.com/video/aliyunmedia.mp4'
       },
       autoSyncPlayProgressTimer: null,
