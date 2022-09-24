@@ -17,7 +17,7 @@ const io = new Server(httpServer, {
 });
 io.on('connection', (socket) => {
 
-  const remoteUser = socket.request.connection.remoteAddress + ':' + socket.request.connection.remotePort;
+  const remoteUser = socket.request.socket.remoteAddress + ':' + socket.request.socket.remotePort;
 
   console.log('来自' + remoteUser + '的新连接');
 
