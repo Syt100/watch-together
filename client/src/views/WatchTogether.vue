@@ -290,7 +290,6 @@ export default {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-evenly;
-  max-width: 1200px;
   margin: auto;
 }
 
@@ -298,13 +297,15 @@ export default {
   width: 100%;
 }
 
-@media only screen and  (min-width: 769px) {
+@media only screen and (min-width: 769px) {
+  .main {
+    max-width: 90%;
+  }
   .video {
-    max-width: 600px;
+    max-width: 60%;
   }
   .panel {
-    width: 500px;
-    max-width: 600px;
+    max-width: 35%;
   }
 }
 
