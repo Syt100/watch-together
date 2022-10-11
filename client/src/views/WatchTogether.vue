@@ -2,18 +2,8 @@
   <div class="video-together-container">
     <div class="main">
       <div class="group video">
-        <VueAliplayerV2
-          v-show="false"
-          ref="VueAliplayerV2"
-          :source="config.source"
-          @ready="handleVideoReady"
-          @play="handleVideoPlay"
-          @pause="handleVideoPause"
-          @completeSeek="handleVideoCompleteSeek"
-        />
-        <XGPlayer
-          ref="xgPlayer"
-          :url="config.source"
+        <ArtPlayer
+          @get-instance="getInstance"
           @play="handleVideoPlay"
           @pause="handleVideoPause"
           @seeked="handleVideoCompleteSeek"
@@ -59,7 +49,7 @@
 </template>
 
 <script>
-import XGPlayer from '@/components/XGPlayer'
+import ArtPlayer from '@/components/ArtPlayer'
 import { getSocket } from '@/api/socketServer'
 import { uuid } from '@/utils/uuid'
 import moment from 'moment'
@@ -67,14 +57,11 @@ import moment from 'moment'
 export default {
   name: 'WatchTogether',
   components: {
-    XGPlayer
+    ArtPlayer
   },
   data () {
     return {
       socket: null,
-      player: null,
-      xgPlayer: null,
-      currentPlayerName: 'xgPlayer',
       currentPlayer: null,
       config: {
         roomId: 123,
@@ -139,10 +126,6 @@ export default {
     }
   },
   mounted () {
-    this.player = this.$refs.VueAliplayerV2
-    this.xgPlayer = this.$refs.xgPlayer
-    this.currentPlayer = this.xgPlayer
-    console.log(this.player)
     this.socket = getSocket()
     // 在连接错误时触发
     this.socket.io.on('error', (err) => {
@@ -163,6 +146,11 @@ export default {
     createRoomId () {
       const x = 100000; const y = 999999
       this.config.roomId = Math.round(Math.random() * (y - x) + x)
+    },
+    getInstance (art) {
+      console.log(art)
+      // 初始化播放器实例
+      this.currentPlayer = art
     },
     handleOtherMessage (message) {
       switch (message.type) {
@@ -201,10 +189,6 @@ export default {
           this.config.source = message.updateUrl
       }
     },
-    handleVideoReady () {
-      console.log('播放器已经准备好播放')
-      this.player.pause()
-    },
     handleVideoPlay () {
       console.log('开始播放')
       this.eventParameters.type = 'play'
@@ -217,11 +201,7 @@ export default {
     },
     handleVideoCompleteSeek (time) {
       this.eventParameters.type = 'seek'
-      if (this.currentPlayerName === 'xgPlayer') {
-        this.eventParameters.seekTime = this.currentPlayer.getPlayer().currentTime
-      } else {
-        this.eventParameters.seekTime = time.paramData
-      }
+      this.eventParameters.seekTime = time
       console.log('跳转播放，时间为', this.eventParameters.seekTime)
       this.seedMessage()
     },
@@ -249,25 +229,13 @@ export default {
       this.currentPlayer.pause()
     },
     playerStatus () {
-      if (this.currentPlayerName === 'xgPlayer') {
-        return this.currentPlayer.getPlayer().paused ? 'paused' : 'playing'
-      } else {
-        return this.currentPlayer.getStatus()
-      }
+      return this.currentPlayer.playing ? 'playing' : 'paused'
     },
     playerGetCurrentTime () {
-      if (this.currentPlayerName === 'xgPlayer') {
-        return this.currentPlayer.getPlayer().currentTime
-      } else {
-        return this.currentPlayer.getCurrentTime()
-      }
+      return this.currentPlayer.currentTime
     },
     playerSeek (time) {
-      if (this.currentPlayerName === 'xgPlayer') {
-        this.currentPlayer.getPlayer().currentTime = time
-      } else {
-        this.currentPlayer.seek(time)
-      }
+      this.currentPlayer.currentTime = time
     },
     pushMessage (message, type) {
       const m = {

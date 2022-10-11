@@ -8,8 +8,10 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "artplayer": "^4.5.8",
     "core-js": "^3.25.0",
     "element-ui": "^2.15.9",
+    "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "normalize.css": "^8.0.1",
     "socket.io-client": "^4.5.2",
