@@ -1,5 +1,5 @@
 <template>
-  <div id="art-player-container" ref="artRef"/>
+  <div id="art-player-container" ref="artRef" @mousedown="isSeeking = true" @mouseup="isSeeking = false"/>
 </template>
 
 <script>
@@ -33,6 +33,7 @@ export default {
         whitelist: ['*'],
         autoOrientation: true // 是否在移动端的网页全屏时，根据视频尺寸和视口尺寸，旋转播放器
       },
+      isSeeking: false,
       events: [
         'ready',
         'play',
@@ -49,6 +50,11 @@ export default {
       }
     }
   },
+  watch: {
+    isSeeking () {
+      console.log('组件内：', this.isSeeking)
+    }
+  },
   mounted () {
     this.instance = new Artplayer({
       ...this.option,
@@ -57,15 +63,17 @@ export default {
     })
     this.$nextTick(() => {
       this.$emit('get-instance', this.instance)
-      // this.events.forEach(event => {
-      //   this.instance.on(event, (...args) => {
-      //     this.$emit(event, ...args)
-      //   })
-      // })
       // seek会出发多次，使用防抖https://www.lodashjs.com/docs/lodash.debounce
       this.instance.on('seek', debounce((...args) => {
-        this.$emit('seeked', ...args)
-      }, 300))
+        if (!this.isSeeking) {
+          this.$emit('seeked', ...args)
+        }
+      }, 200))
+      // 拖动进度条事件，会多次触发，此处不能监听原生事件，原生事件会导致本机设置currentTime时也会触发此事件
+      this.instance.on('seek', (...args) => {
+        this.$emit('seeking', ...args)
+        console.log('触发调节进度事件')
+      })
       this.instance.on('video:play', (...args) => {
         this.$emit('play', ...args)
       })

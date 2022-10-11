@@ -3,9 +3,11 @@
     <div class="main">
       <div class="group video">
         <ArtPlayer
+          :option="{url: config.source}"
           @get-instance="getInstance"
           @play="handleVideoPlay"
           @pause="handleVideoPause"
+          @seeking="handleVideoSeeking"
           @seeked="handleVideoCompleteSeek"
         />
       </div>
@@ -70,11 +72,13 @@ export default {
       },
       autoSyncPlayProgressTimer: null,
       syncProgressTime: 0, // 本机与对方的进度差值
+      isSeeking: false, // 是否处于调节进度状态，避免与自动同步进度冲突
       eventParameters: {
         type: 'play',
         uuid: undefined,
         seekTime: null,
-        updateUrl: null
+        updateUrl: null,
+        isSeeking: false
       },
       messageList: [],
       messageColorList: {
@@ -108,7 +112,7 @@ export default {
           if (this.autoSyncPlayProgressTimer) {
             clearInterval(this.autoSyncPlayProgressTimer)
           }
-          this.autoSyncPlayProgressTimer = setInterval(this.handleAutoSyncPlayProgress, 1000 * 3)
+          this.autoSyncPlayProgressTimer = setInterval(this.handleAutoSyncPlayProgress, 1000 * 2)
         } else {
           if (this.autoSyncPlayProgressTimer != null) {
             clearInterval(this.autoSyncPlayProgressTimer)
@@ -178,7 +182,8 @@ export default {
           const difference = Math.abs(this.playerGetCurrentTime() - message.seekTime)
           console.log('本机进度与远程进度的差距为', difference)
           this.syncProgressTime = this.playerGetCurrentTime() - message.seekTime
-          if (difference > 6) {
+          // 只有当自己和对方都没有调节进度条时才同步
+          if (difference > 6 && !this.isSeeking && !message.isSeeking && this.playerStatus() === 'playing') {
             this.playerSeek(message.seekTime)
             this.pushMessage('播放进度已同步', 'sync')
           }
@@ -199,19 +204,27 @@ export default {
       this.eventParameters.type = 'pause'
       this.seedMessage()
     },
+    handleVideoSeeking () {
+      this.isSeeking = true
+    },
     handleVideoCompleteSeek (time) {
       this.eventParameters.type = 'seek'
       this.eventParameters.seekTime = time
       console.log('跳转播放，时间为', this.eventParameters.seekTime)
+      this.isSeeking = true
+      // 设置延时，防止点击进度条时自动同步进度
+      setTimeout(() => {
+        console.log('this.isSeeking = ', this.isSeeking)
+        this.isSeeking = false
+      }, 300)
       this.seedMessage()
     },
     handleAutoSyncPlayProgress () {
       console.log('自动同步进度。当前播放器状态', this.playerStatus())
-      if (this.playerStatus() === 'playing') {
-        this.eventParameters.type = 'syncProcess'
-        this.eventParameters.seekTime = this.playerGetCurrentTime()
-        this.seedMessage()
-      }
+      this.eventParameters.type = 'syncProcess'
+      this.eventParameters.seekTime = this.playerGetCurrentTime()
+      this.eventParameters.isSeeking = this.isSeeking
+      this.seedMessage()
     },
     handleUpdateVideoUrl () {
       console.log('更新播放链接')
