@@ -5,12 +5,9 @@ import store from './store'
 
 import 'normalize.css'
 
-import VueAliplayerV2 from 'vue-aliplayer-v2'
-
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 
-Vue.use(VueAliplayerV2)
 Vue.use(ElementUI)
 
 Vue.config.productionTip = false
