@@ -52,7 +52,7 @@
 import ArtPlayer from '@/components/ArtPlayer'
 import { getSocket } from '@/api/socketServer'
 import { uuid } from '@/utils/uuid'
-import moment from 'moment'
+import { format } from 'date-fns'
 
 export default {
   name: 'WatchTogether',
@@ -240,7 +240,7 @@ export default {
     pushMessage (message, type) {
       const m = {
         id: uuid(),
-        content: moment().format('hh:mm:ss') + ' ' + message,
+        content: format(new Date(), 'hh:mm:ss') + ' ' + message,
         color: this.messageColorList[type]
       }
       this.messageList.unshift(m)
