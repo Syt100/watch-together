@@ -4,7 +4,7 @@
 
 <script>
 import Player from 'xgplayer'
-import HlsJsPlayer from 'xgplayer-hls.js'
+// import HlsJsPlayer from 'xgplayer-hls.js'
 
 export default {
   name: 'XGPlayer',
@@ -112,7 +112,7 @@ export default {
       this.player && this.player.destroy() // 防止实例的重复
       let player = null
       if (this.url.includes('.m3u8')) {
-        player = new HlsJsPlayer(config)
+        // player = new HlsJsPlayer(config)
       } else {
         player = new Player(config)
       }

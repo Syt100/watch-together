@@ -21,9 +21,7 @@
     "vue": "^2.7.10",
     "vue-router": "^3.6.4",
     "vuex": "^3.6.2",
-    "xgplayer": "^2.31.7",
-    "xgplayer-flv.js": "^2.3.0",
-    "xgplayer-hls.js": "^2.6.2"
+    "xgplayer": "^2.31.7"
   },
   "devDependencies": {
     "@babel/core": "^7.18.13",
