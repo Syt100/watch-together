@@ -63,11 +63,57 @@ export default {
     }
   },
   mounted () {
+    let hls = null
+    let flvPlayer = null
+    let dashPlayer = null
     this.instance = new Artplayer({
       url: this.url,
       ...this.option,
       ...this.optionDefault,
-      container: this.$refs.artRef
+      container: this.$refs.artRef,
+      customType: {
+        m3u8: async function (video, url) {
+          const { default: Hls } = await import('hls.js')
+          // 切换地址前，要销毁上一个解码器实例
+          if (hls) {
+            hls.destroy()
+          }
+
+          if (Hls.isSupported()) {
+            hls = new Hls()
+            hls.loadSource(url)
+            hls.attachMedia(video)
+          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = url
+          } else {
+            this.instance.notice.show = '不支持播放格式：m3u8'
+          }
+        },
+        flv: async function (video, url) {
+          const { default: flvjs } = await import('flv.js')
+          if (flvPlayer) {
+            flvPlayer.destroy()
+          }
+          if (flvjs.isSupported()) {
+            flvPlayer = flvjs.createPlayer({
+              type: 'flv',
+              url: url
+            })
+            flvPlayer.attachMediaElement(video)
+            flvPlayer.load()
+          } else {
+            this.instance.notice.show = '不支持播放格式：flv'
+          }
+        },
+        mpd: async function (video, url) {
+          const { default: dashjs } = await import('dashjs')
+          if (dashPlayer) {
+            dashPlayer.destroy()
+          }
+          dashPlayer = dashjs.MediaPlayer().create()
+          dashPlayer.initialize(video, url, true)
+        }
+      }
     })
     this.$nextTick(() => {
       this.$emit('get-instance', this.instance)
