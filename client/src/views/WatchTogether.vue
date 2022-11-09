@@ -3,7 +3,7 @@
     <div class="main">
       <div class="group video">
         <ArtPlayer
-          :option="{url: config.source}"
+          :url="config.source"
           @get-instance="getInstance"
           @play="handleVideoPlay"
           @pause="handleVideoPause"

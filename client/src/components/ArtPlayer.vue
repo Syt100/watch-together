@@ -13,7 +13,6 @@ export default {
     return {
       instance: null,
       optionDefault: {
-        url: 'https://artplayer.org/assets/sample/video.mp4',
         title: 'Your Name',
         theme: 'var(--bpx-primary-color,#00a1d6)',
         volume: 0.8,
@@ -48,15 +47,24 @@ export default {
       default: function () {
         return {}
       }
+    },
+    url: {
+      type: String,
+      required: false,
+      default: 'https://artplayer.org/assets/sample/video.mp4'
     }
   },
   watch: {
     isSeeking () {
       console.log('组件内：', this.isSeeking)
+    },
+    url (newUrl) {
+      this.instance.switchUrl(newUrl)
     }
   },
   mounted () {
     this.instance = new Artplayer({
+      url: this.url,
       ...this.option,
       ...this.optionDefault,
       container: this.$refs.artRef
