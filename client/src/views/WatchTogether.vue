@@ -27,7 +27,11 @@
           <div>
             <div style="margin: 10px 0;">当前播放：</div>
             <el-input v-model.lazy="config.source" placeholder="输入视频链接">
-              <el-button slot="append" icon="el-icon-check" @click="handleUpdateVideoUrl">更新</el-button>
+              <template slot="append">
+                <el-button @click="handlePasteVideoUrl">粘贴</el-button>
+                <el-divider direction="vertical" />
+                <el-button slot="append" icon="el-icon-check" @click="handleUpdateVideoUrl">更新</el-button>
+              </template>
             </el-input>
           </div>
           <el-form :model="config">
@@ -224,6 +228,19 @@ export default {
       this.eventParameters.seekTime = this.playerGetCurrentTime()
       this.eventParameters.isSeeking = this.isSeeking
       this.seedMessage()
+    },
+    // 点击将剪贴板中的内容粘贴到输入框
+    async handlePasteVideoUrl () {
+      const val = await navigator.clipboard.readText()
+      console.log('剪贴板中的内容：', val)
+      if (val) {
+        this.config.source = val
+      } else {
+        this.$message({
+          message: '剪贴板中无内容',
+          type: 'warning'
+        })
+      }
     },
     handleUpdateVideoUrl () {
       console.debug('更新播放链接')
