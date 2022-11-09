@@ -39,6 +39,9 @@
               <el-switch v-model="config.autoSyncPlayProgress" />
               <span>{{ syncProgressTimeComputed }}</span>
             </el-form-item>
+            <el-form-item label="服务器状态">
+              <el-tag :type="serverStatusMap[serverStatus].type" size="medium">{{ serverStatusMap[serverStatus].name }}</el-tag>
+            </el-form-item>
           </el-form>
           <el-divider></el-divider>
           <el-card shadow="hover" style="max-height: 300px;overflow-y: auto">
@@ -90,7 +93,13 @@ export default {
         pause: '#fee140',
         seek: '#fa709a',
         sync: '#4facfe'
-      }
+      },
+      serverStatus: 0,
+      serverStatusMap: [
+        { name: '未连接', type: 'danger' },
+        { name: '已连接', type: 'success' },
+        { name: '重连中', type: 'warning' }
+      ]
     }
   },
   computed: {
@@ -135,12 +144,18 @@ export default {
   },
   mounted () {
     this.socket = getSocket()
+    // 此事件由 Socket 实例在连接和重新连接时触发
+    this.socket.on('connect', () => {
+      this.serverStatus = 1
+    })
     // 在连接错误时触发
     this.socket.io.on('error', (err) => {
       console.log('连接错误', err) // false
+      this.serverStatus = 2
     })
-    this.socket.io.on('reconnect', attempt => {
-      console.log('连接成功', attempt)
+    // 在断开连接时触发
+    this.socket.on('disconnect', () => {
+      this.serverStatus = 0
     })
     this.socket.on('video-control', (res) => {
       const result = JSON.parse(res)
@@ -304,6 +319,10 @@ export default {
   .panel {
     max-width: 35%;
   }
+}
+
+.el-form-item {
+  margin-bottom: 0;
 }
 
 span {
