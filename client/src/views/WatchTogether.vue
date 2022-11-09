@@ -140,7 +140,7 @@ export default {
     })
     this.socket.on('video-control', (res) => {
       const result = JSON.parse(res)
-      console.log('接收到消息：', result)
+      console.debug('接收到消息：', result)
       if (result.uuid !== this.eventParameters.uuid && result.roomId === this.config.roomId) {
         this.handleOtherMessage(result)
       }
@@ -152,24 +152,23 @@ export default {
       this.config.roomId = Math.round(Math.random() * (y - x) + x)
     },
     getInstance (art) {
-      console.log(art)
       // 初始化播放器实例
       this.currentPlayer = art
     },
     handleOtherMessage (message) {
       switch (message.type) {
         case 'play':
-          console.log('收到开始播放的消息：', message)
+          console.debug('收到开始播放的消息：', message)
           this.playerPlay()
           this.pushMessage('对方开始播放', 'play')
           break
         case 'pause':
-          console.log('收到暂停播放的消息', message)
+          console.debug('收到暂停播放的消息', message)
           this.playerPause()
           this.pushMessage('对方暂停播放', 'pause')
           break
         case 'seek': {
-          console.log('收到调节播放进度的消息', message)
+          console.debug('收到调节播放进度的消息', message)
           const difference = Math.abs(this.playerGetCurrentTime() - message.seekTime)
           if (difference > 2) {
             this.playerSeek(message.seekTime)
@@ -178,9 +177,9 @@ export default {
           break
         }
         case 'syncProcess': {
-          console.log('收到同步播放进度的消息', message)
+          console.debug('收到同步播放进度的消息', message)
           const difference = Math.abs(this.playerGetCurrentTime() - message.seekTime)
-          console.log('本机进度与远程进度的差距为', difference)
+          console.debug('本机进度与远程进度的差距为', difference)
           this.syncProgressTime = this.playerGetCurrentTime() - message.seekTime
           // 只有当自己和对方都没有调节进度条时才同步
           if (difference > 6 && !this.isSeeking && !message.isSeeking && this.playerStatus() === 'playing') {
@@ -190,7 +189,7 @@ export default {
           break
         }
         case 'updateUrl':
-          console.log('收到更新播放url的消息', message)
+          console.debug('收到更新播放url的消息', message)
           this.config.source = message.updateUrl
       }
     },
@@ -220,14 +219,14 @@ export default {
       this.seedMessage()
     },
     handleAutoSyncPlayProgress () {
-      console.log('自动同步进度。当前播放器状态', this.playerStatus())
+      console.debug('自动同步进度。当前播放器状态', this.playerStatus())
       this.eventParameters.type = 'syncProcess'
       this.eventParameters.seekTime = this.playerGetCurrentTime()
       this.eventParameters.isSeeking = this.isSeeking
       this.seedMessage()
     },
     handleUpdateVideoUrl () {
-      console.log('更新播放链接')
+      console.debug('更新播放链接')
       this.eventParameters.type = 'updateUrl'
       this.eventParameters.updateUrl = this.config.source
       this.seedMessage()
