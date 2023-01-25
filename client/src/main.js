@@ -1,19 +1,16 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import App from './App.vue'
-import router from './router'
-import store from './store'
+// pinia数据持久化插件
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
-import 'normalize.css'
+import '@csstools/normalize.css'
+import './assets/main.css'
 
-import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
 
-Vue.use(ElementUI)
+const app = createApp(App)
+app.use(pinia)
 
-Vue.config.productionTip = false
-
-new Vue({
-  router,
-  store,
-  render: h => h(App)
-}).$mount('#app')
+app.mount('#app')

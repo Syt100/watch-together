@@ -1,145 +1,182 @@
 <template>
-  <div id="art-player-container" ref="artRef" @mousedown="isSeeking = true" @mouseup="isSeeking = false"/>
+  <div
+      id="art-player-container"
+      ref="artRef"
+      @mousedown="isSeeking = true"
+      @mouseup="isSeeking = false"
+  />
 </template>
 
-<script>
+<script setup>
+import {nextTick, onMounted, reactive, ref, watch, watchEffect} from 'vue'
 import Artplayer from 'artplayer'
-// import * as _ from 'lodash'
-import { debounce } from 'lodash'
+import {useDebounceFn} from '@vueuse/core'
 
-export default {
-  name: 'ArtPlayer',
-  data () {
-    return {
-      instance: null,
-      optionDefault: {
-        title: 'Your Name',
-        theme: 'var(--bpx-primary-color,#00a1d6)',
-        volume: 0.8,
-        flip: true, // 是否显示视频翻转功能，目前只出现在 设置面板 里，所以需要同时设置 setting 为 true
-        playbackRate: true, // 是否显示视频播放速度功能，会出现在 设置面板 和 右键菜单 里
-        aspectRatio: true, // 是否显示视频长宽比功能，会出现在 设置面板 和 右键菜单 里
-        screenshot: true, // 是否在底部控制栏里显示视频截图功能
-        // 可选 由于浏览器安全机制，假如视频源地址和网站是跨域的，可能会出现截图失败
-        moreVideoAttr: {
-          crossOrigin: 'anonymous'
-        },
-        setting: true, // 是否在底部控制栏里显示设置面板的开关按钮
-        pip: true, // 是否在底部控制栏里显示画中画的开关按钮
-        fullscreen: true, // 是否在底部控制栏里显示播放器窗口全屏按钮
-        fullscreenWeb: true, // 是否在底部控制栏里显示播放器网页全屏按钮
-        subtitleOffset: true, // 字幕时间偏移，范围在 [-5s, 5s]
-        whitelist: ['*'],
-        autoOrientation: true // 是否在移动端的网页全屏时，根据视频尺寸和视口尺寸，旋转播放器
-      },
-      isSeeking: false,
-      events: [
-        'ready',
-        'play',
-        'pause'
-      ]
+// 声明props
+const props = defineProps({
+  option: {
+    type: Object,
+    required: false,
+    default: function () {
+      return {}
     }
   },
-  props: {
-    option: {
-      type: Object,
-      required: false,
-      default: function () {
-        return {}
-      }
-    },
-    url: {
-      type: String,
-      required: false,
-      default: 'https://artplayer.org/assets/sample/video.mp4'
-    }
-  },
-  watch: {
-    isSeeking () {
-      console.log('组件内：', this.isSeeking)
-    },
-    url (newUrl) {
-      this.instance.switchUrl(newUrl)
-    }
-  },
-  mounted () {
-    let hls = null
-    let flvPlayer = null
-    let dashPlayer = null
-    this.instance = new Artplayer({
-      url: this.url,
-      ...this.option,
-      ...this.optionDefault,
-      container: this.$refs.artRef,
-      customType: {
-        m3u8: async function (video, url) {
-          const { default: Hls } = await import('hls.js')
-          // 切换地址前，要销毁上一个解码器实例
-          if (hls) {
-            hls.destroy()
-          }
+  url: {
+    type: String,
+    required: false,
+    default: 'https://artplayer.org/assets/sample/video.mp4'
+  }
+})
 
-          if (Hls.isSupported()) {
-            hls = new Hls()
-            hls.loadSource(url)
-            hls.attachMedia(video)
-          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = url
-          } else {
-            this.instance.notice.show = '不支持播放格式：m3u8'
-          }
-        },
-        flv: async function (video, url) {
-          const { default: flvjs } = await import('flv.js')
-          if (flvPlayer) {
-            flvPlayer.destroy()
-          }
-          if (flvjs.isSupported()) {
-            flvPlayer = flvjs.createPlayer({
-              type: 'flv',
-              url: url
-            })
-            flvPlayer.attachMediaElement(video)
-            flvPlayer.load()
-          } else {
-            this.instance.notice.show = '不支持播放格式：flv'
-          }
-        },
-        mpd: async function (video, url) {
-          const { default: dashjs } = await import('dashjs')
-          if (dashPlayer) {
-            dashPlayer.destroy()
-          }
-          dashPlayer = dashjs.MediaPlayer().create()
-          dashPlayer.initialize(video, url, true)
-        }
-      }
-    })
-    this.$nextTick(() => {
-      this.$emit('get-instance', this.instance)
-      // seek会出发多次，使用防抖https://www.lodashjs.com/docs/lodash.debounce
-      this.instance.on('seek', debounce((...args) => {
-        if (!this.isSeeking) {
-          this.$emit('seeked', ...args)
-        }
-      }, 200))
-      // 拖动进度条事件，会多次触发，此处不能监听原生事件，原生事件会导致本机设置currentTime时也会触发此事件
-      this.instance.on('seek', (...args) => {
-        this.$emit('seeking', ...args)
-        console.log('触发调节进度事件')
-      })
-      this.instance.on('video:play', (...args) => {
-        this.$emit('play', ...args)
-      })
-      this.instance.on('video:pause', (...args) => {
-        this.$emit('pause', ...args)
-      })
-    })
+// 声明事件
+const emit = defineEmits(['get-instance', 'seeked', 'seeking', 'play', 'pause'])
+
+// 实例ref引用
+const artRef = ref()
+let instance = null
+
+const defaultOption = reactive({
+  title: 'Your Name',
+  theme: 'var(--bpx-primary-color,#00a1d6)',
+  volume: 0.8,
+  flip: true, // 是否显示视频翻转功能，目前只出现在 设置面板 里，所以需要同时设置 setting 为 true
+  playbackRate: true, // 是否显示视频播放速度功能，会出现在 设置面板 和 右键菜单 里
+  aspectRatio: true, // 是否显示视频长宽比功能，会出现在 设置面板 和 右键菜单 里
+  screenshot: true, // 是否在底部控制栏里显示视频截图功能
+  // 可选 由于浏览器安全机制，假如视频源地址和网站是跨域的，可能会出现截图失败
+  moreVideoAttr: {
+    crossOrigin: 'anonymous'
   },
-  beforeUnmount () {
-    if (this.instance && this.instance.destroy) {
-      this.instance.destroy(false)
+  setting: true, // 是否在底部控制栏里显示设置面板的开关按钮
+  pip: true, // 是否在底部控制栏里显示画中画的开关按钮
+  fullscreen: true, // 是否在底部控制栏里显示播放器窗口全屏按钮
+  fullscreenWeb: true, // 是否在底部控制栏里显示播放器网页全屏按钮
+  subtitleOffset: true, // 字幕时间偏移，范围在 [-5s, 5s]
+  whitelist: ['*'],
+  autoOrientation: true // 是否在移动端的网页全屏时，根据视频尺寸和视口尺寸，旋转播放器
+})
+
+const isSeeking = ref(false)
+const events = [
+  'ready',
+  'play',
+  'pause'
+]
+
+watchEffect(() => {
+  // console.log('组件内：', isSeeking.value)
+})
+
+// 监听播放链接变化
+watch(() => props.url, newUrl => {
+  console.log('更新url')
+  if (instance) {
+    instance.switchUrl(newUrl)
+  }
+})
+
+onMounted(() => {
+  instance = new Artplayer({
+    url: props.url,
+    ...props.option,
+    ...defaultOption,
+    container: artRef.value,
+    customType: {
+      m3u8: playM3u8,
+      flv: playMpegTs,
+      mpd: playMpd
     }
+  })
+
+  nextTick(() => {
+    emit('get-instance', instance)
+    // seek会出发多次，使用防抖https://www.lodashjs.com/docs/lodash.debounce
+
+    instance.on('seek', useDebounceFn((...args) => {
+      if (!isSeeking.value) {
+        emit('seeked', ...args)
+      }
+    }, 200))
+
+    // 拖动进度条事件，会多次触发，此处不能监听原生事件，原生事件会导致本机设置currentTime时也会触发此事件
+    instance.on('seek', (...args) => {
+      emit('seeking', ...args)
+      console.log('触发调节进度事件')
+    })
+    instance.on('video:play', (...args) => {
+      emit('play', ...args)
+    })
+    instance.on('video:pause', (...args) => {
+      emit('pause', ...args)
+    })
+  })
+})
+
+async function playM3u8(video, url, art) {
+  const {default: Hls} = await import('hls.js')
+  if (Hls.isSupported()) {
+    // 添加enableWorker: false配置以解决报错问题 https://github.com/video-dev/hls.js/issues/5107
+    const hls = new Hls({enableWorker: false});
+    hls.loadSource(url);
+    hls.attachMedia(video);
+
+    // optional
+    art.hls = hls;
+    art.once('url', () => hls.destroy());
+    art.once('destroy', () => hls.destroy());
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = url;
+  } else {
+    art.notice.show = '不支持播放格式: m3u8';
+  }
+}
+
+// 使用mpegts.js代替flv.js https://github.com/xqq/mpegts.js
+// 原来的写法
+// async function playFlv(video, url, art) {
+//   const {default: flvjs} = await import('flv.js')
+//   if (flvjs.isSupported()) {
+//     const flv = flvjs.createPlayer({type: 'flv', url});
+//     flv.attachMediaElement(video);
+//     flv.load();
+//
+//     // optional
+//     art.flv = flv;
+//     art.once('url', () => flv.destroy());
+//     art.once('destroy', () => flv.destroy());
+//   } else {
+//     art.notice.show = '不支持播放格式: flv';
+//   }
+// }
+async function playMpegTs(video, url, art) {
+  // const {default: flvjs} = await import('flv.js')
+  const Mpegts = await import('mpegts.js')
+  if (Mpegts.isSupported()) {
+    const flv = Mpegts.createPlayer({type: 'flv', url});
+    flv.attachMediaElement(video);
+    flv.load();
+
+    // optional
+    art.flv = flv;
+    art.once('url', () => flv.destroy());
+    art.once('destroy', () => flv.destroy());
+  } else {
+    art.notice.show = '不支持播放格式: flv';
+  }
+}
+
+async function playMpd(video, url, art) {
+  const { default: dashjs } = await import('dashjs')
+  if (dashjs.supportsMediaSource()) {
+    const dash = dashjs.MediaPlayer().create();
+    dash.initialize(video, url, art.option.autoplay);
+
+    // optional
+    art.dash = dash;
+    art.once('url', () => dash.destroy());
+    art.once('destroy', () => dash.destroy());
+  } else {
+    art.notice.show = '不支持播放格式: mpd';
   }
 }
 </script>
