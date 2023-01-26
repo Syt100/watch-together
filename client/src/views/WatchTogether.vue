@@ -13,6 +13,10 @@
       </div>
       <div class="group panel">
         <div>
+          <!-- 兼容性警告 -->
+          <n-alert v-if="watchConfigStore.showCompatibilityAlert" class="m-tb10" title="浏览器版本过低警告" type="warning" closable>
+            当前浏览器版本过低，部分功能可能无法正常使用，页面显示可能出现异常。
+          </n-alert>
           <n-tabs animated default-value="first" >
             <n-tab-pane tab="加入房间" name="first">
               <n-input-group>

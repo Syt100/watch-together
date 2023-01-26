@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 function createRoomId() {
@@ -12,8 +12,9 @@ export const useWatchConfigStore = defineStore('watchConfig', () => {
     autoSyncPlayProgress: true,
     source: '//player.alicdn.com/video/aliyunmedia.mp4'
   })
-
-  return { config }
+  // 是否显示兼容性警告
+  const showCompatibilityAlert = ref(false)
+  return { config, showCompatibilityAlert }
 }, {
   persist: true
 })

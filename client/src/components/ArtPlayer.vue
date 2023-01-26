@@ -4,6 +4,7 @@
       ref="artRef"
       @mousedown="isSeeking = true"
       @mouseup="isSeeking = false"
+      :style="artPlayerStyle"
   />
 </template>
 
@@ -11,6 +12,9 @@
 import {nextTick, onMounted, reactive, ref, watch, watchEffect} from 'vue'
 import Artplayer from 'artplayer'
 import {useDebounceFn} from '@vueuse/core'
+import {useWatchConfigStore} from '@/stores/watchConfig'
+
+const watchConfig = useWatchConfigStore()
 
 // 声明props
 const props = defineProps({
@@ -63,6 +67,9 @@ const events = [
   'pause'
 ]
 
+// 播放器样式
+const artPlayerStyle = reactive({})
+
 watchEffect(() => {
   // console.log('组件内：', isSeeking.value)
 })
@@ -110,7 +117,21 @@ onMounted(() => {
       emit('pause', ...args)
     })
   })
+  compatibilityCheck()
 })
+
+// 兼容性检查
+function compatibilityCheck () {
+  // 检查浏览器是否支持CSS的aspect-ratio属性
+  if ('aspectRatio' in document.documentElement.style) {
+    // 支持则什么都不做
+  } else {
+    // offsetWidth获取元素真实大小
+    // 将高度设为宽度的9/16，从而实现横纵比16:9
+    artPlayerStyle.height = artRef.value.offsetWidth * 9 / 16 + 'px'
+    watchConfig.showCompatibilityAlert = true
+  }
+}
 
 async function playM3u8(video, url, art) {
   const {default: Hls} = await import('hls.js')

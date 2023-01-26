@@ -79,3 +79,8 @@ body {
 .mtb0 {
   margin-bottom: 10px;
 }
+
+/* 上下margin 10px */
+.m-tb10 {
+  margin: 10px 0;
+}
