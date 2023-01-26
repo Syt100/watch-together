@@ -50,6 +50,9 @@
                 {{ serverStatus.map[serverStatus.status].name }}
               </n-tag>
             </n-form-item>
+            <n-form-item label="深色模式">
+              <n-switch v-model:value="isDark" @update:value="toggleDark" />
+            </n-form-item>
           </n-form>
 
           <n-card hoverable style="max-height: 300px;overflow-y: auto; width: 100%">
@@ -72,6 +75,10 @@ import { getSocket } from '@/api/socketServer'
 import { uuid } from '@/utils/uuid'
 import { useWatchConfigStore } from '@/stores/watchConfig'
 import { useNotification } from 'naive-ui'
+import { useDark, useToggle } from '@vueuse/core'
+
+const isDark = useDark()
+const toggleDark = useToggle(isDark)
 
 const notification = useNotification()
 
