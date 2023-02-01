@@ -45,11 +45,19 @@
               <n-switch v-model:value="config.autoSyncPlayProgress"/>
               <span>{{ syncProgressTimeComputed }}</span>
             </n-form-item>
+
+            <n-form-item label="同步阈值" feedback="进度差距超过阈值时自动将对方进度同步到本机">
+              <n-input-number v-model:value="config.autoSyncThreshold">
+                <template #suffix>秒</template>
+              </n-input-number>
+            </n-form-item>
+
             <n-form-item label="服务器状态">
               <n-tag :type="serverStatus.map[serverStatus.status].type" size="medium">
                 {{ serverStatus.map[serverStatus.status].name }}
               </n-tag>
             </n-form-item>
+
             <n-form-item label="深色模式">
               <n-switch v-model:value="isDark" @update:value="toggleDark" />
             </n-form-item>
@@ -254,7 +262,7 @@ function handleOtherMessage(message) {
       syncConfig.syncProgressTime = playerGetCurrentTime() - message.seekTime
       // 只有当自己和对方都没有调节进度条时才同步
       // 同步条件：开启自动同步，进度差异大于指定值，自己和对方都没有调节播放进度，自己播放器处于播放状态
-      const isSync = config.autoSyncPlayProgress && difference > 6
+      const isSync = config.autoSyncPlayProgress && difference > config.autoSyncThreshold
         && !syncConfig.isSeeking && !message.isSeeking && playerStatus() === 'playing'
       if (isSync) {
         playerSeek(message.seekTime)

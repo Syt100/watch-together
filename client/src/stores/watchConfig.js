@@ -11,6 +11,8 @@ export const useWatchConfigStore = defineStore('watchConfig', () => {
     roomId: createRoomId(),
     /** 是否开启自动同步进度 */
     autoSyncPlayProgress: true,
+    /** 自动同步进度的阈值，当进度差异超过此阈值时会触发同步 */
+    autoSyncThreshold: 6,
     source: '//player.alicdn.com/video/aliyunmedia.mp4'
   })
   // 是否显示兼容性警告
