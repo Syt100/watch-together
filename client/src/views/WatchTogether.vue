@@ -55,12 +55,14 @@
             </n-form-item>
           </n-form>
 
-          <n-card hoverable style="max-height: 300px;overflow-y: auto; width: 100%">
-            <ul>
-              <li v-for="item in messageList" :key="item.id">
-                <span :style="{color: item.color}">{{ item.content }}</span>
-              </li>
-            </ul>
+          <n-card hoverable >
+            <n-scrollbar style="max-height: 300px;">
+              <ul>
+                <li v-for="item in messageList" :key="item.id">
+                  <span :style="{color: item.color}">{{ item.content }}</span>
+                </li>
+              </ul>
+            </n-scrollbar>
           </n-card>
         </div>
       </div>
