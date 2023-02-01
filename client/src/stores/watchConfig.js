@@ -9,6 +9,7 @@ function createRoomId() {
 export const useWatchConfigStore = defineStore('watchConfig', () => {
   const config = reactive({
     roomId: createRoomId(),
+    /** 是否开启自动同步进度 */
     autoSyncPlayProgress: true,
     source: '//player.alicdn.com/video/aliyunmedia.mp4'
   })

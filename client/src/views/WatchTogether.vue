@@ -42,7 +42,7 @@
 
           <n-form class="mt10" :model="config" label-align="left" label-placement="left" label-width="auto">
             <n-form-item label="自动同步进度">
-              <n-switch v-model:value="config.autoSyncPlayProgress" @update:value="onAutoSyncProgressChange" />
+              <n-switch v-model:value="config.autoSyncPlayProgress"/>
               <span>{{ syncProgressTimeComputed }}</span>
             </n-form-item>
             <n-form-item label="服务器状态">
@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-import { computed, reactive } from 'vue'
+import { computed, onBeforeUnmount, reactive } from 'vue'
 import ArtPlayer from '@/components/ArtPlayer.vue'
 import { getSocket } from '@/api/socketServer'
 import { uuid } from '@/utils/uuid'
@@ -116,7 +116,13 @@ function createRoomId() {
   return  Math.round(Math.random() * (y - x) + x)
 }
 
-let autoSyncPlayProgressTimer = null
+// 发送自动同步消息的定时器
+let autoSyncPlayProgressTimer = setInterval(handleAutoSyncPlayProgress, 1000 * 2)
+// 页面卸载前清除定时器
+onBeforeUnmount(() => {
+  clearInterval(autoSyncPlayProgressTimer)
+  autoSyncPlayProgressTimer = null
+})
 
 const syncConfig = reactive({
   syncProgressTime: 0, // 本机与对方的进度差值
@@ -213,23 +219,6 @@ function handlePasteVideoUrl () {
   }
 }
 
-// 初始调用一次
-onAutoSyncProgressChange(config.autoSyncPlayProgress)
-
-function onAutoSyncProgressChange(value) {
-  if (value) {
-    console.log('开启自动同步')
-    if (autoSyncPlayProgressTimer) {
-      clearInterval(autoSyncPlayProgressTimer)
-    }
-    autoSyncPlayProgressTimer = setInterval(handleAutoSyncPlayProgress, 1000 * 2)
-  } else {
-    if (autoSyncPlayProgressTimer != null) {
-      clearInterval(autoSyncPlayProgressTimer)
-    }
-  }
-}
-
 function handleUpdateVideoUrl () {
   console.debug('更新播放链接')
   eventParameters.type = 'updateUrl'
@@ -264,7 +253,10 @@ function handleOtherMessage(message) {
       console.debug('本机进度与远程进度的差距为', difference)
       syncConfig.syncProgressTime = playerGetCurrentTime() - message.seekTime
       // 只有当自己和对方都没有调节进度条时才同步
-      if (difference > 6 && !syncConfig.isSeeking && !message.isSeeking && playerStatus() === 'playing') {
+      // 同步条件：开启自动同步，进度差异大于指定值，自己和对方都没有调节播放进度，自己播放器处于播放状态
+      const isSync = config.autoSyncPlayProgress && difference > 6
+        && !syncConfig.isSeeking && !message.isSeeking && playerStatus() === 'playing'
+      if (isSync) {
         playerSeek(message.seekTime)
         pushMessage('播放进度已同步', 'sync')
       }
