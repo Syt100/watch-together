@@ -4,6 +4,12 @@ const { Server } = require("socket.io");
 const httpServer = createServer();
 const port = 2233;
 
+// 启动参数数组
+const args = process.argv.slice(2);
+// 通过检查启动参数数组中是否包含dev字符串判断是否处于开发环境
+// 开发环境使用package.json中的dev启动命令，该命令后面包含dev参数
+const isDevEnv = args.includes('dev');
+
 httpServer.listen(port, () => {
   console.log('正在监听端口：' + port);
 });
@@ -26,8 +32,20 @@ io.on('connection', (socket) => {
   });
 
   socket.on('video-control', (controlParam) => {
-    console.log('用户' + remoteUser + '的消息:' + controlParam);
+    // console.log('用户' + remoteUser + '的消息:' + controlParam);
+    debugLog('用户', remoteUser, '的消息:', controlParam);
     io.emit('video-control', controlParam);
   });
 
 });
+
+/**
+ * 根据当前运行环境打印日志。
+ * 当为开发环境时才打印日志
+ * @param  {...any} args 多个要输出的参数，最终连接为一个字符串输出
+ */
+function debugLog(...args) {
+  if (isDevEnv) {
+    console.log(args.join(''));
+  }
+}

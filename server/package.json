@@ -4,7 +4,8 @@
   "description": "watch-together-server websocket server",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "node index.js dev"
   },
   "dependencies": {
     "socket.io": "^4.5.3"
