@@ -13,6 +13,10 @@ import {nextTick, onMounted, reactive, ref, watch} from 'vue'
 import Artplayer from 'artplayer'
 import {useDebounceFn} from '@vueuse/core'
 import {useWatchConfigStore} from '@/stores/watchConfig'
+import {useThemeVars} from 'naive-ui'
+
+// Naive UI的主题变量
+const themeVars = useThemeVars()
 
 const watchConfig = useWatchConfigStore()
 
@@ -41,7 +45,7 @@ let instance = null
 
 const defaultOption = reactive({
   title: 'Your Name',
-  theme: 'var(--bpx-primary-color,#00a1d6)',
+  theme: themeVars.value.primaryColor,
   volume: 0.8,
   flip: true, // 是否显示视频翻转功能，目前只出现在 设置面板 里，所以需要同时设置 setting 为 true
   playbackRate: true, // 是否显示视频播放速度功能，会出现在 设置面板 和 右键菜单 里
