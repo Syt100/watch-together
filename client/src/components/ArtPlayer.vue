@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import {nextTick, onMounted, reactive, ref, watch, watchEffect} from 'vue'
+import {nextTick, onMounted, reactive, ref, watch} from 'vue'
 import Artplayer from 'artplayer'
 import {useDebounceFn} from '@vueuse/core'
 import {useWatchConfigStore} from '@/stores/watchConfig'
@@ -70,13 +70,8 @@ const events = [
 // 播放器样式
 const artPlayerStyle = reactive({})
 
-watchEffect(() => {
-  // console.log('组件内：', isSeeking.value)
-})
-
 // 监听播放链接变化
 watch(() => props.url, newUrl => {
-  console.log('更新url')
   if (instance) {
     instance.switchUrl(newUrl)
   }
