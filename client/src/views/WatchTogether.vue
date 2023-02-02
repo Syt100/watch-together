@@ -63,6 +63,8 @@
             </n-form-item>
           </n-form>
 
+          <n-button class="mb10" @click="watchConfigStore.advancedSettingConfig.show = true">高级设置</n-button>
+
           <n-card hoverable >
             <n-scrollbar style="max-height: 300px;">
               <ul>
@@ -86,6 +88,7 @@ import { uuid } from '@/utils/uuid'
 import { useWatchConfigStore } from '@/stores/watchConfig'
 import { useNotification } from 'naive-ui'
 import { useDark, useToggle } from '@vueuse/core'
+import { debugLog } from '@/utils/logUtil'
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
@@ -109,7 +112,7 @@ socket.on('disconnect', () => {
 })
 socket.on('video-control', (res) => {
   const result = JSON.parse(res)
-  console.debug('接收到消息：', result)
+  debugLog('debug', '接收到消息：', result)
   if (result.uuid !== eventParameters.uuid && result.roomId === config.roomId) {
     handleOtherMessage(result)
   }
@@ -176,13 +179,13 @@ function getInstance (art) {
 }
 
 function handleVideoPlay () {
-  console.log('开始播放')
+  debugLog('log', '开始播放')
   eventParameters.type = 'play'
   seedMessage()
 }
 
 function handleVideoPause () {
-  console.log('暂停播放')
+  debugLog('log', '暂停播放')
   eventParameters.type = 'pause'
   seedMessage()
 }
@@ -192,17 +195,17 @@ function handleVideoSeeking () {
 function handleVideoCompleteSeek (time) {
   eventParameters.type = 'seek'
   eventParameters.seekTime = time
-  console.log('跳转播放，时间为', eventParameters.seekTime)
+  debugLog('debug', '跳转播放，时间为', eventParameters.seekTime)
   syncConfig.isSeeking = true
   // 设置延时，防止点击进度条时自动同步进度
   setTimeout(() => {
-    console.log('this.isSeeking = ', syncConfig.isSeeking)
+    debugLog('debug', 'this.isSeeking = ', syncConfig.isSeeking)
     syncConfig.isSeeking = false
   }, 300)
   seedMessage()
 }
 function handleAutoSyncPlayProgress () {
-  console.debug('自动同步进度。当前播放器状态', playerStatus())
+  debugLog('debug', '自动同步进度。当前播放器状态', playerStatus())
   eventParameters.type = 'syncProcess'
   eventParameters.seekTime = playerGetCurrentTime()
   eventParameters.isSeeking = syncConfig.isSeeking
@@ -214,7 +217,7 @@ function handlePasteVideoUrl () {
   const clipboard = navigator.clipboard
   if (clipboard) {
     clipboard.readText().then(value => {
-      console.log('剪贴板中的内容：', value)
+      debugLog('debug', '剪贴板中的内容：', value)
       config.source = value
     })
   } else {
@@ -228,7 +231,7 @@ function handlePasteVideoUrl () {
 }
 
 function handleUpdateVideoUrl () {
-  console.debug('更新播放链接')
+  debugLog('debug', '更新播放链接')
   eventParameters.type = 'updateUrl'
   eventParameters.updateUrl = config.source
   seedMessage()
@@ -237,17 +240,17 @@ function handleUpdateVideoUrl () {
 function handleOtherMessage(message) {
   switch (message.type) {
     case 'play':
-      console.debug('收到开始播放的消息：', message)
+      debugLog('debug', '收到开始播放的消息：', message)
       playerPlay()
       pushMessage('对方开始播放', 'play')
       break
     case 'pause':
-      console.debug('收到暂停播放的消息', message)
+      debugLog('debug', '收到暂停播放的消息', message)
       playerPause()
       pushMessage('对方暂停播放', 'pause')
       break
     case 'seek': {
-      console.debug('收到调节播放进度的消息', message)
+      debugLog('debug', '收到调节播放进度的消息', message)
       const difference = Math.abs(playerGetCurrentTime() - message.seekTime)
       if (difference > 2) {
         playerSeek(message.seekTime)
@@ -256,9 +259,9 @@ function handleOtherMessage(message) {
       break
     }
     case 'syncProcess': {
-      console.debug('收到同步播放进度的消息', message)
+      debugLog('debug', '收到同步播放进度的消息', message)
       const difference = Math.abs(playerGetCurrentTime() - message.seekTime)
-      console.debug('本机进度与远程进度的差距为', difference)
+      debugLog('debug', '本机进度与远程进度的差距为', difference)
       syncConfig.syncProgressTime = playerGetCurrentTime() - message.seekTime
       // 只有当自己和对方都没有调节进度条时才同步
       // 同步条件：开启自动同步，进度差异大于指定值，自己和对方都没有调节播放进度，自己播放器处于播放状态
@@ -271,7 +274,7 @@ function handleOtherMessage(message) {
       break
     }
     case 'updateUrl':
-      console.debug('收到更新播放url的消息', message)
+      debugLog('debug', '收到更新播放url的消息', message)
       config.source = message.updateUrl
   }
 }
