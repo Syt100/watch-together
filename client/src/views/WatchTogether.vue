@@ -31,7 +31,7 @@
           </n-tabs>
 
           <div>
-            <div style="margin: 10px 0;">当前播放：</div>
+            <div class="m-tb10">当前播放：</div>
             <n-input-group>
               <n-input v-model:value.lazy="config.source" placeholder="输入视频链接"/>
               <n-button @click="handlePasteVideoUrl">粘贴</n-button>
