@@ -8,6 +8,6 @@
     "dev": "node index.js dev"
   },
   "dependencies": {
-    "socket.io": "^4.5.3"
+    "socket.io": "^4.5.4"
   }
 }
