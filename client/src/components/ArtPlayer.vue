@@ -41,6 +41,7 @@ const emit = defineEmits(['get-instance', 'seeked', 'seeking', 'play', 'pause'])
 
 // 实例ref引用
 const artRef = ref()
+/** @type {import("artplayer")} */
 let instance = null
 
 const defaultOption = reactive({
@@ -53,7 +54,11 @@ const defaultOption = reactive({
   screenshot: true, // 是否在底部控制栏里显示视频截图功能
   // 可选 由于浏览器安全机制，假如视频源地址和网站是跨域的，可能会出现截图失败
   moreVideoAttr: {
-    crossOrigin: 'anonymous'
+    crossOrigin: 'anonymous',
+    // https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/video#attr-preload
+    // preload属性控制预加载行为
+    // https://web.dev/fast-playback-with-preload/#manual_buffering
+    preload: watchConfig.advancedSettingConfig.enablePreloadAuto ? 'auto' : 'metadata'
   },
   setting: true, // 是否在底部控制栏里显示设置面板的开关按钮
   pip: true, // 是否在底部控制栏里显示画中画的开关按钮
@@ -78,6 +83,13 @@ const artPlayerStyle = reactive({})
 watch(() => props.url, newUrl => {
   if (instance) {
     instance.switchUrl(newUrl)
+  }
+})
+
+// 监听高级设置的缓冲整个视频选项变化
+watch(() => watchConfig.advancedSettingConfig.enablePreloadAuto, newValue => {
+  if (instance) {
+    instance.video.preload = newValue ? 'auto' : 'metadata'
   }
 })
 

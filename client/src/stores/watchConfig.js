@@ -20,7 +20,9 @@ export const useWatchConfigStore = defineStore('watchConfig', () => {
     /** 是否显示高级设置对话框 */
     show: false,
     /** 是否开启debug模式 */
-    enableDebugModel: false
+    enableDebugModel: false,
+    /** 开启缓冲整个视频，将video元素的preload属性设为auto(默认值为metadata)，在播放过程中会自动缓冲整个视频 */
+    enablePreloadAuto: false
   })
 
   // 是否显示兼容性警告
