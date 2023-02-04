@@ -4,6 +4,7 @@
       <n-form class="mt10" :model="config" label-align="left" label-placement="left" label-width="auto">
         <n-form-item label="启用debug模式" path="enableDebugModel">
           <n-switch v-model:value="config.enableDebugModel"/>
+          <div class="ml10">开启后会在控制台输出debug日志</div>
         </n-form-item>
 
         <n-form-item label="缓冲整个视频" feedback="此功能由浏览器实现，某些浏览器可能会完全忽略该属性">
