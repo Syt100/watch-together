@@ -64,6 +64,7 @@
           </n-form>
 
           <n-button class="mb10" @click="watchConfigStore.advancedSettingConfig.show = true">高级设置</n-button>
+          <n-button class="mb10 ml10" @click="subtitleConfig.show = true">字幕设置</n-button>
 
           <n-card hoverable >
             <n-scrollbar style="max-height: 300px;">
@@ -87,11 +88,14 @@ import { getSocket } from '@/api/socketServer'
 import { uuid } from '@/utils/uuid'
 import { useWatchConfigStore } from '@/stores/watchConfig'
 import { useNotification } from 'naive-ui'
-import { useDark, useToggle } from '@vueuse/core'
+import { useDark, useEventBus, useObjectUrl, useToggle } from '@vueuse/core'
 import { debugLog } from '@/utils/logUtil'
+import { useSubtitleConfigStore } from '@/stores/subtitleConfig'
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
+
+const subtitleConfig = useSubtitleConfigStore()
 
 const notification = useNotification()
 
@@ -313,6 +317,48 @@ function seedMessage() {
   }
   socket.emit('video-control', JSON.stringify(params))
 }
+
+// 监听SubtitleSetting组件的同步字幕事件
+const bus = useEventBus('updateSubtitle')
+bus.on(event => {
+  debugLog('log', '发送字幕', event)
+  const params = {
+    roomId: config.roomId,
+    ...eventParameters,
+    subtitle: event
+  }
+  socket.emit('sync-subtitle', params)
+})
+
+// 监听对方的同步字幕事件
+socket.on('sync-subtitle', (res) => {
+  const result = res
+  debugLog('log', '接收到同步字幕的消息：', result)
+  if (result.uuid !== eventParameters.uuid && result.roomId === config.roomId) {
+    /** @type SyncSubtitle */
+    const subtitleData = result.subtitle
+
+    if (subtitleData.type === 'url') {
+      subtitleConfig.subtitleUrl = subtitleData.url
+
+      notification.success({
+        title: '字幕URL同步成功',
+        duration: 5000
+      })
+      pushMessage('字幕URL同步成功', 'sync')
+    } else if (subtitleData.type === 'file') {
+      const file = new File([subtitleData.file], subtitleData.fileName)
+      subtitleConfig.subtitleUrl = useObjectUrl(file).value
+      subtitleConfig.subtitleType = subtitleData.subtitleType
+
+      notification.success({
+        title: '字幕文件同步成功',
+        duration: 5000
+      })
+      pushMessage('字幕文件同步成功', 'sync')
+    }
+  }
+})
 </script>
 
 <style scoped>

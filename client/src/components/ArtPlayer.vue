@@ -14,11 +14,13 @@ import Artplayer from 'artplayer'
 import {useDebounceFn} from '@vueuse/core'
 import {useWatchConfigStore} from '@/stores/watchConfig'
 import {useThemeVars} from 'naive-ui'
+import { useSubtitleConfigStore } from '@/stores/subtitleConfig'
 
 // Naive UI的主题变量
 const themeVars = useThemeVars()
 
 const watchConfig = useWatchConfigStore()
+const subtitleConfig = useSubtitleConfigStore()
 
 // 声明props
 const props = defineProps({
@@ -85,6 +87,21 @@ watch(() => props.url, newUrl => {
     instance.switchUrl(newUrl)
   }
 })
+
+// 监听subtitleConfig.subtitleUrl 和 subtitleConfig.subtitleType 的变化
+watch(
+  [() => subtitleConfig.subtitleUrl, () => subtitleConfig.subtitleType],
+  ([newSubtitleUrl, newSubtitleType]) => {
+    if (instance && newSubtitleUrl) {
+      instance.subtitle.url = newSubtitleUrl
+      instance.subtitle.switch(newSubtitleUrl, {
+        type: newSubtitleType
+      })
+      console.log('更新字幕URL：', newSubtitleUrl)
+      console.log('更新字幕类型：', newSubtitleType)
+    }
+  }
+)
 
 // 监听高级设置的缓冲整个视频选项变化
 watch(() => watchConfig.advancedSettingConfig.enablePreloadAuto, newValue => {

@@ -1,9 +1,12 @@
 <template>
   <n-config-provider :theme="isDark ? darkTheme : null">
-    <n-notification-provider>
-      <WatchTogether/>
-      <AdvancedSettings/>
-    </n-notification-provider>
+    <n-message-provider>
+      <n-notification-provider>
+        <WatchTogether/>
+        <AdvancedSettings/>
+        <SubtitleSetting/>
+      </n-notification-provider>
+    </n-message-provider>
   </n-config-provider>
 </template>
 
@@ -14,6 +17,7 @@ import { useDark } from '@vueuse/core'
 import { defineAsyncComponent } from 'vue'
 // 异步加载组件
 const AdvancedSettings = defineAsyncComponent(() => import('@/components/AdvancedSettings.vue'))
+const SubtitleSetting = defineAsyncComponent(() => import('@/components/SubtitleSetting.vue'))
 
 const isDark = useDark()
 
