@@ -37,6 +37,12 @@ io.on('connection', (socket) => {
     io.emit('video-control', controlParam);
   });
 
+  // 转发同步字幕的事件
+  socket.on('sync-subtitle', (...controlParam) => {
+    debugLog('用户', remoteUser, '的消息:', ...controlParam);
+    io.emit('sync-subtitle', ...controlParam);
+  })
+
 });
 
 /**
