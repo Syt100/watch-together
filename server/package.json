@@ -1,0 +1,14 @@
+{
+  "name": "watch-together-server",
+  "version": "1.0.0",
+  "description": "watch-together-server websocket server",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js dev"
+  },
+  "dependencies": {
+    "socket.io": "^4.5.4"
+  }
+}
