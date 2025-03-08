@@ -1,6 +1,8 @@
 import express from "express";
 import { createServer } from "http";
+import path from "path";
 import { Server } from "socket.io";
+import { fileURLToPath } from "url";
 
 const app = express();
 const httpServer = createServer(app);
@@ -11,6 +13,17 @@ const args = process.argv.slice(2);
 // 通过检查启动参数数组中是否包含dev字符串判断是否处于开发环境
 // 开发环境使用package.json中的dev启动命令，该命令后面包含dev参数
 const isDevEnv = args.includes('dev');
+
+// 托管静态资源
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, 'static')));
+
+// 处理前端路由（支持 SPA）
+app.get('*', (req, res) => {
+  console.log('request to /: ', req.url);
+  res.sendFile(path.join(__dirname, 'static/index.html'));
+});
 
 const io = new Server(httpServer, {
   cors: {
