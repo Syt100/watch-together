@@ -1,7 +1,9 @@
+import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 
-const httpServer = createServer();
+const app = express();
+const httpServer = createServer(app);
 const port = 2233;
 
 // 启动参数数组
@@ -9,10 +11,6 @@ const args = process.argv.slice(2);
 // 通过检查启动参数数组中是否包含dev字符串判断是否处于开发环境
 // 开发环境使用package.json中的dev启动命令，该命令后面包含dev参数
 const isDevEnv = args.includes('dev');
-
-httpServer.listen(port, () => {
-  console.log('正在监听端口：' + port);
-});
 
 const io = new Server(httpServer, {
   cors: {
@@ -43,6 +41,10 @@ io.on('connection', (socket) => {
     io.emit('sync-subtitle', ...controlParam);
   })
 
+});
+
+httpServer.listen(port, () => {
+  console.log('正在监听端口：' + port);
 });
 
 /**
