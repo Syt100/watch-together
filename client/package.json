@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "node ./scripts/generate-build-info.js",
     "dev": "vite",
     "build": "vite build",
     "build:server": "vite build --outDir ../server/static",

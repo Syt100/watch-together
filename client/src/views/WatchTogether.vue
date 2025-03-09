@@ -78,6 +78,7 @@
         </div>
       </div>
     </div>
+    <VersionInfo/>
   </div>
 </template>
 
@@ -91,6 +92,7 @@ import { useNotification } from 'naive-ui'
 import { useDark, useEventBus, useObjectUrl, useToggle } from '@vueuse/core'
 import { debugLog } from '@/utils/logUtil'
 import { useSubtitleConfigStore } from '@/stores/subtitleConfig'
+import VersionInfo from '@/components/VersionInfo.vue'
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)

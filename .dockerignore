@@ -1,5 +1,6 @@
 # 排除版本控制目录
-.git
+# 编译时需要.git信息
+# .git
 .gitignore
 client/.gitignore
 server/.gitignore

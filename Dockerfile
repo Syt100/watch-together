@@ -5,12 +5,18 @@ ARG NPM_REGISTRY=https://registry.npmmirror.com
 
 WORKDIR /app
 
+# 安装git，修改阿里云镜像源
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk add --no-cache git
+
 # 安装client依赖
 COPY client/package.json client/package-lock.json ./client/
 RUN cd client && npm install --registry ${NPM_REGISTRY}
 
 # 复制client源码并编译client
 COPY client ./client
+# 复制.git目录，确保能够正常生成git 版本信息
+COPY .git ./
 RUN cd client && npm run build
 
 # 优先复制依赖声明文件 (利用 Docker 缓存层)
