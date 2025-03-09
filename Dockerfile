@@ -1,10 +1,13 @@
 FROM node:22-alpine AS builder
 
+# 定义构建参数并设置默认值
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+
 WORKDIR /app
 
 # 安装client依赖
 COPY client/package.json client/package-lock.json ./client/
-RUN cd client && npm install --registry 
+RUN cd client && npm install --registry ${NPM_REGISTRY}
 
 # 复制client源码并编译client
 COPY client ./client
@@ -15,7 +18,7 @@ COPY server/package.json server/package-lock.json* ./server/
 RUN cd server && \
     # 强制检查 lock 文件存在性
     if [ -f package-lock.json ]; then \
-      npm ci --production; \
+      npm ci --production --registry ${NPM_REGISTRY}; \
     else \
       echo "Error: package-lock.json not found!" >&2; \
       exit 1; \
