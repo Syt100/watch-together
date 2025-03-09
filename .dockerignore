@@ -1,0 +1,22 @@
+# 排除版本控制目录
+.git
+.gitignore
+client/.gitignore
+server/.gitignore
+
+# 排除构建产物（已通过 build:server 脚本部署到服务端）
+client/dist
+server/static
+
+# 排除依赖目录（Docker 内通过 package.json 重新安装）
+client/node_modules
+server/node_modules
+
+# 排除临时文件和日志
+npm-debug.log
+yarn-error.log
+*.log
+
+# 排除开发工具配置（如测试文件）
+/test
+/*.test.js
