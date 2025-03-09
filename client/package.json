@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
-    "eslint": "^8.22.0",
+    "eslint": "^9.22.0",
     "eslint-plugin-vue": "^10.0.0",
     "naive-ui": "^2.34.3",
     "unplugin-auto-import": "^19.1.1",
