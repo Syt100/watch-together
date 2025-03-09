@@ -39,5 +39,13 @@ COPY server ./server
 # 复制client构建产物
 COPY --from=builder /app/client/dist ./server/static
 
+# 安全配置
+# 使用单独的用户运行应用
+RUN addgroup -S appgroup && \
+    adduser -S appuser -G appgroup && \
+    chown -R appuser:appgroup /app
+
+USER appuser
+
 EXPOSE 2233
 CMD [ "node", "server/index.js" ]
