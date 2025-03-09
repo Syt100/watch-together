@@ -10,7 +10,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@csstools/normalize.css": "^12.0.0",
+    "@csstools/normalize.css": "^12.1.1",
     "@vueuse/core": "^9.12.0",
     "artplayer": "^4.6.2",
     "dashjs": "^4.5.2",
